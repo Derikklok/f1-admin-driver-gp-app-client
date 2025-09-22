@@ -183,7 +183,8 @@ const Drivers = () => {
             borderRadius="lg" 
             boxShadow="sm"
             border="1px"
-            borderColor={{ base: "gray.200", _dark: "gray.700" }}
+            borderColor={{ base: "gray.100", _dark: "gray.800" }}
+            className="f1-table"
           >
             <Table.Root size="md">
               <Table.Header>

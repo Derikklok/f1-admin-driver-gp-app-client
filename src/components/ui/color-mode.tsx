@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 "use client"
 
 import type { IconButtonProps, SpanProps } from "@chakra-ui/react"
@@ -7,9 +8,32 @@ import type { ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { LuMoon, LuSun } from "react-icons/lu"
 
-export interface ColorModeProviderProps extends ThemeProviderProps {}
+export type ColorModeProviderProps = ThemeProviderProps
 
 export function ColorModeProvider(props: ColorModeProviderProps) {
+  React.useEffect(() => {
+    // Add event listener to update body class when theme changes
+    const observer = new MutationObserver(() => {
+      if (document.documentElement.classList.contains('dark')) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    // Initial setup
+    if (document.documentElement.classList.contains('dark')) {
+      document.body.classList.add('dark-mode');
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange {...props} />
   )
@@ -46,12 +70,10 @@ export function ColorModeIcon() {
   return colorMode === "dark" ? <LuMoon /> : <LuSun />
 }
 
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+export type ColorModeButtonProps = Omit<IconButtonProps, "aria-label">
 
-export const ColorModeButton = React.forwardRef<
-  HTMLButtonElement,
-  ColorModeButtonProps
->(function ColorModeButton(props, ref) {
+export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButtonProps>(
+  function ColorModeButton(props, ref) {
   const { toggleColorMode } = useColorMode()
   return (
     <ClientOnly fallback={<Skeleton boxSize="9" />}>

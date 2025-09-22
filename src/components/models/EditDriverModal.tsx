@@ -6,7 +6,6 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogActionTrigger,
   DialogBackdrop,
   Button,
   Input,
@@ -16,12 +15,12 @@ import {
   Box
 } from '@chakra-ui/react'
 import { Edit } from 'lucide-react'
-import type { Driver } from '../../types/driver'
+import type { Driver, DriverUpdateRequest } from '../../types/driver'
 
 // Temporary inline service until import issue is resolved
 const API_BASE_URL = 'http://localhost:5251/api'
 
-const updateDriver = async (id: number, driverData: any) => {
+const updateDriver = async (id: number, driverData: DriverUpdateRequest) => {
   const response = await fetch(`${API_BASE_URL}/drivers/${id}`, {
     method: 'PUT',
     headers: {
@@ -197,22 +196,32 @@ export const EditDriverModal = ({ driver, isOpen, onClose, onDriverUpdated }: Ed
   }
 
   return (
-    <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
-      <DialogBackdrop style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.55)',
-        zIndex: 50,
-        backdropFilter: 'blur(4px)',
-        animation: 'fadeIn 0.2s ease-out',
-        WebkitBackdropFilter: 'blur(4px)', // For Safari support
-        transition: 'opacity 0.2s ease'
-      }} />
+    <DialogRoot open={isOpen} onOpenChange={(e) => {
+      if (!e.open) {
+        onClose()
+      }
+    }}>
+      <DialogBackdrop
+        onClick={() => onClose()}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.55)',
+          zIndex: 50,
+          backdropFilter: 'blur(4px)',
+          animation: 'fadeIn 0.2s ease-out',
+          WebkitBackdropFilter: 'blur(4px)', // For Safari support
+          transition: 'opacity 0.2s ease',
+          cursor: 'pointer'
+        }}
+      />
       
       <DialogContent 
         position="fixed" 
         top="50%" 
         left="50%" 
+        className="f1-modal"
+        onClick={(e) => e.stopPropagation()}
         style={{ 
           transform: 'translate(-50%, -50%)',
           maxHeight: '90vh',
@@ -230,8 +239,7 @@ export const EditDriverModal = ({ driver, isOpen, onClose, onDriverUpdated }: Ed
         bg={{ base: "white", _dark: "gray.800" }}
       >
         <DialogHeader 
-          borderBottom="1px" 
-          borderColor={{ base: "gray.100", _dark: "gray.700" }} 
+          className="f1-modal-header"
           pb={4} 
           pt={4} 
           px={5} 
@@ -387,23 +395,20 @@ export const EditDriverModal = ({ driver, isOpen, onClose, onDriverUpdated }: Ed
         </DialogBody>
         
         <DialogFooter 
-          borderTop="1px" 
-          borderColor={{ base: "gray.100", _dark: "gray.700" }} 
+          className="f1-modal-footer"
           p={4}
           px={5}
           bg={{ base: "gray.50", _dark: "gray.900" }}
         >
           <HStack gap={3} justify="flex-end" w="full">
-            <DialogActionTrigger asChild>
-              <Button 
-                variant="outline" 
-                onClick={onClose}
-                _hover={{ bg: "gray.100", _dark: { bg: "gray.700" } }}
-                transition="all 0.2s"
-              >
-                Cancel
-              </Button>
-            </DialogActionTrigger>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              _hover={{ bg: "gray.100", _dark: { bg: "gray.700" } }}
+              transition="all 0.2s"
+            >
+              Cancel
+            </Button>
             <Button 
               colorPalette="blue" 
               onClick={handleSubmit}

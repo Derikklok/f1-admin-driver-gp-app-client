@@ -45,7 +45,7 @@ export interface DriverFormData {
   teamName: string
 }
 
-export interface DriverCreateRequest extends DriverFormData {}
+export type DriverCreateRequest = DriverFormData
 
 export interface DriverUpdateRequest extends DriverFormData {
   id: number

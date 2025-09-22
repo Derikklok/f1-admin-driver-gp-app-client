@@ -7,7 +7,6 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogActionTrigger,
   DialogBackdrop,
   Button,
   Input,
@@ -17,11 +16,12 @@ import {
   Box
 } from '@chakra-ui/react'
 import { Plus } from 'lucide-react'
+import type { DriverCreateRequest } from '../../types/driver'
 
 // Temporary inline service until import issue is resolved
 const API_BASE_URL = 'http://localhost:5251/api'
 
-const createDriver = async (driverData: any) => {
+const createDriver = async (driverData: DriverCreateRequest) => {
   const response = await fetch(`${API_BASE_URL}/drivers`, {
     method: 'POST',
     headers: {
@@ -241,13 +241,17 @@ export const AddDriverModal = ({ onDriverAdded }: AddDriverModalProps) => {
       </DialogTrigger>
       
       <DialogBackdrop 
+        onClick={() => setIsOpen(false)}
         style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          backgroundColor: 'rgba(0, 0, 0, 0.55)',
           zIndex: 50,
           backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)', // For Safari support
           animation: isOpen ? 'fadeIn 0.2s ease-out' : 'none',
+          transition: 'opacity 0.2s ease',
+          cursor: 'pointer'
         }} 
       />
       
@@ -255,6 +259,8 @@ export const AddDriverModal = ({ onDriverAdded }: AddDriverModalProps) => {
         position="fixed" 
         top="50%" 
         left="50%" 
+        className="f1-modal"
+        onClick={(e) => e.stopPropagation()}
         style={{ 
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -272,7 +278,7 @@ export const AddDriverModal = ({ onDriverAdded }: AddDriverModalProps) => {
         aria-labelledby="add-driver-dialog-title"
         aria-describedby="add-driver-dialog-description"
       >
-        <DialogHeader borderBottom="1px" borderColor={{ base: "gray.100", _dark: "gray.700" }} pb={3}>
+        <DialogHeader className="f1-modal-header" pb={3}>
           <HStack gap={2} align="center">
             <Box color="teal.500">
               <Plus size={20} />
@@ -389,16 +395,14 @@ export const AddDriverModal = ({ onDriverAdded }: AddDriverModalProps) => {
           </VStack>
         </DialogBody>
         
-        <DialogFooter borderTop="1px" borderColor={{ base: "gray.100", _dark: "gray.700" }} p={4}>
+        <DialogFooter className="f1-modal-footer" p={4}>
           <HStack gap={3} justify="flex-end" w="full">
-            <DialogActionTrigger asChild>
-              <Button 
-                variant="outline" 
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
-            </DialogActionTrigger>
+            <Button 
+              variant="outline" 
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
             <Button 
               colorPalette="teal" 
               onClick={handleSubmit}

@@ -5,7 +5,6 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogActionTrigger,
   DialogBackdrop,
   Button,
   VStack,
@@ -43,19 +42,28 @@ export const ViewDriverModal = ({ driver, isOpen, onClose }: ViewDriverModalProp
   ]
   
   return (
-    <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
-      <DialogBackdrop style={{
+    <DialogRoot open={isOpen} onOpenChange={(e) => {
+      if (!e.open) {
+        onClose()
+      }
+    }}>
+      <DialogBackdrop onClick={() => onClose()} style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
         zIndex: 50,
-        backdropFilter: 'blur(4px)'
+        backdropFilter: 'blur(4px)',
+        animation: 'fadeIn 0.2s ease-out',
+        WebkitBackdropFilter: 'blur(4px)', // For Safari support
+        transition: 'opacity 0.2s ease'
       }} />
       
       <DialogContent 
         position="fixed" 
         top="50%" 
         left="50%" 
+        className="f1-modal"
+        onClick={(e) => e.stopPropagation()}
         style={{ 
           transform: 'translate(-50%, -50%)',
           maxHeight: '90vh',
@@ -69,7 +77,7 @@ export const ViewDriverModal = ({ driver, isOpen, onClose }: ViewDriverModalProp
         }}
         bg={{ base: "white", _dark: "gray.800" }}
       >
-        <DialogHeader borderBottom="1px" borderColor={{ base: "gray.100", _dark: "gray.700" }} pb={3}>
+        <DialogHeader className="f1-modal-header" pb={3}>
           <HStack gap={2} align="center">
             <Box color="purple.500">
               <Eye size={20} />
@@ -168,16 +176,14 @@ export const ViewDriverModal = ({ driver, isOpen, onClose }: ViewDriverModalProp
           </VStack>
         </DialogBody>
         
-        <DialogFooter borderTop="1px" borderColor={{ base: "gray.100", _dark: "gray.700" }} p={4}>
+        <DialogFooter className="f1-modal-footer" p={4}>
           <HStack gap={3} justify="center" w="full">
-            <DialogActionTrigger asChild>
-              <Button 
-                colorPalette="purple" 
-                onClick={onClose}
-              >
-                Close
-              </Button>
-            </DialogActionTrigger>
+            <Button 
+              colorPalette="purple" 
+              onClick={onClose}
+            >
+              Close
+            </Button>
           </HStack>
         </DialogFooter>
       </DialogContent>

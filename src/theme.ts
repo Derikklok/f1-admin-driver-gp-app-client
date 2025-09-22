@@ -56,6 +56,11 @@ const customConfig = defineConfig({
         "border": {
           value: { base: "gray.200", _dark: "gray.700" }
         },
+        
+        // Table-specific color tokens for use in component styling
+        "table-border": {
+          value: { base: "gray.100", _dark: "gray.800" }
+        },
       },
     },
   },
