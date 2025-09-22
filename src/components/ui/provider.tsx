@@ -6,11 +6,14 @@ import {
   ColorModeProvider,
   type ColorModeProviderProps,
 } from "./color-mode"
+import { ParticipationProvider } from "../../context/ParticipationContext"
 
 export function Provider(props: ColorModeProviderProps) {
   return (
     <ChakraProvider value={system}>
-      <ColorModeProvider {...props} />
+      <ParticipationProvider>
+        <ColorModeProvider {...props} />
+      </ParticipationProvider>
     </ChakraProvider>
   )
 }

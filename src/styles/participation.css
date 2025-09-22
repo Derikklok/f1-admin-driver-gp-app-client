@@ -1,0 +1,50 @@
+.participation-form {
+  background: var(--chakra-colors-white, #ffffff);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  font-size: 13px;
+  color: #4a5568;
+  margin-bottom: 6px;
+}
+
+.field select {
+  min-width: 220px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: transparent;
+  color: inherit;
+}
+
+.participation-result {
+  border: 1px solid rgba(16,185,129,0.12);
+  background: rgba(16,185,129,0.04);
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.gp-alert {
+  color: #c53030;
+}
+
+@media (prefers-color-scheme: dark) {
+  .participation-form {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: none;
+  }
+  .field select {
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+}

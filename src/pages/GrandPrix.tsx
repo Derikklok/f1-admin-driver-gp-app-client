@@ -1,10 +1,11 @@
 
 import { useEffect, useState } from "react"
 import { Box, Text, VStack, HStack, Button, Spinner, SimpleGrid } from "@chakra-ui/react"
-import { Trophy } from "lucide-react"
+import { Trophy, RefreshCw } from "lucide-react"
 import type { GrandPrix as GrandPrixType } from "../types/driver"
 import "../styles/gp.css"
 import AddGrandPrixModal from "../components/models/AddGrandPrixModal"
+import { useParticipations } from "../context/ParticipationContext"
 
 const API = "http://localhost:5251/api/grandprix"
 
@@ -12,31 +13,48 @@ const GrandPrix = () => {
   const [gps, setGps] = useState<GrandPrixType[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Use the participation context to get the latest participation data
+  const { participations, refreshParticipations } = useParticipations();
   
+  const fetchGP = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(API)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      // Response has { $id, $values: [] }
+      const values = Array.isArray(data?.$values) ? data.$values : []
+      setGps(values)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     let mounted = true
-    const fetchGP = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch(API)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data = await res.json()
-        // Response has { $id, $values: [] }
-        const values = Array.isArray(data?.$values) ? data.$values : []
-        if (mounted) setGps(values)
-      } catch (err) {
-        if (mounted) setError(err instanceof Error ? err.message : String(err))
-      } finally {
-        if (mounted) setLoading(false)
-      }
+    
+    const loadData = async () => {
+      if (mounted) await fetchGP();
     }
-
-    fetchGP()
+    
+    loadData();
     return () => {
       mounted = false
     }
   }, [])
+  
+  // Create a mapping of GP IDs to their participation records
+  // This will be used to show the latest participation data for each GP
+  const participationsByGpId = participations.reduce((acc, participation) => {
+    const gpId = participation.grandPrixId;
+    if (!acc[gpId]) {
+      acc[gpId] = [];
+    }
+    acc[gpId].push(participation);
+    return acc;
+  }, {} as Record<number, typeof participations>);
 
   return (
     <Box p={8} display="flex" justifyContent="center" alignItems="flex-start" minH="calc(100vh - 80px)">
@@ -54,7 +72,15 @@ const GrandPrix = () => {
 
         <HStack gap={4}>
           <AddGrandPrixModal onCreate={(gp) => setGps(prev => (prev ? [gp, ...prev] : [gp]))} />
-          <Button colorPalette="teal" variant="outline">View Race Calendar</Button>
+          <Button 
+            colorScheme="teal" 
+            variant="outline" 
+            onClick={async () => {
+              await Promise.all([fetchGP(), refreshParticipations()]);
+            }}
+          >
+            <RefreshCw size={16} style={{ marginRight: '8px' }} /> Refresh Data
+          </Button>
         </HStack>
 
         <Box w="full">
@@ -90,9 +116,10 @@ const GrandPrix = () => {
                     <Box borderTopWidth={1} borderColor={{ base: 'gray.100', _dark: 'gray.700' }} my={2} />
                     <Box>
                       <Text fontSize="sm" fontWeight="medium" mb={2}>Participants</Text>
-                      {gp.participations?.$values && gp.participations.$values.length > 0 ? (
+                      {/* Use participationsByGpId for the latest data */}
+                      {participationsByGpId[gp.id]?.length > 0 ? (
                         <HStack gap={2} style={{ flexWrap: 'wrap' }}>
-                          {gp.participations.$values.map((p) => (
+                          {participationsByGpId[gp.id].map((p) => (
                             <Box key={p.id} className="gp-participant" p={2} borderRadius="md" bg={{ base: 'gray.50', _dark: 'gray.900' }}>
                               <Text fontSize="sm">{p.driver?.firstName} {p.driver?.lastName} <Box as="span" color="gray.500">(#{p.driver?.driverNumber})</Box></Text>
                               <Text fontSize="xs" color="gray.500">{p.driver?.teamName}</Text>
@@ -100,7 +127,19 @@ const GrandPrix = () => {
                           ))}
                         </HStack>
                       ) : (
-                        <Text fontSize="sm" color="gray.500">No participants yet</Text>
+                        // Fallback to the original data if context doesn't have it yet
+                        gp.participations?.$values && gp.participations.$values.length > 0 ? (
+                          <HStack gap={2} style={{ flexWrap: 'wrap' }}>
+                            {gp.participations.$values.map((p) => (
+                              <Box key={p.id} className="gp-participant" p={2} borderRadius="md" bg={{ base: 'gray.50', _dark: 'gray.900' }}>
+                                <Text fontSize="sm">{p.driver?.firstName} {p.driver?.lastName} <Box as="span" color="gray.500">(#{p.driver?.driverNumber})</Box></Text>
+                                <Text fontSize="xs" color="gray.500">{p.driver?.teamName}</Text>
+                              </Box>
+                            ))}
+                          </HStack>
+                        ) : (
+                          <Text fontSize="sm" color="gray.500">No participants yet</Text>
+                        )
                       )}
                     </Box>
                   </Box>
